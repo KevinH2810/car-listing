@@ -23,8 +23,7 @@ module.exports = class carListingService {
 	}
 
 	async getCarDetail(carId, callback) {
-		car
-    findByPk(carId, { include: ["brand", "color", "fuel"] })
+		car.findByPk(carId, { include: ["brand", "color", "fuel"] })
 			.then((data) => {
 				return callback(null, data);
 			})
