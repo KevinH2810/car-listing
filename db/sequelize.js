@@ -6,7 +6,7 @@ async function initDB(){
 
   console.log('===============sequelize.js')
   // create db if it doesn't already exist
-  const { HOST, PORT, USER, PASSWORD, DBNAME } = config.db;
+  const { HOST, USER, PASSWORD, DBNAME } = config.db;
   const connection = await mysql.createConnection({
     host: HOST,
     user: USER,
