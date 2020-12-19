@@ -121,11 +121,6 @@ module.exports = class CarModelController extends BaseController {
 					});
 				}
 
-				console.log(
-					"Decoded = ",
-					util.inspect(decoded, { showHidden: false, depth: null })
-				);
-
 				const { userId } = decoded;
 
 				this.service.addCarModel(

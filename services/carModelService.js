@@ -85,7 +85,6 @@ module.exports = class carListingService {
 				}
 			})
 			.catch((err) => {
-				console.log(err)
 				return callback(err, null);
 			});
 	}
@@ -97,7 +96,6 @@ module.exports = class carListingService {
 				return callback(null, data);
 			})
 			.catch((err) => {
-				console.log(err)
 				return callback(err, null);
 			});
 	}

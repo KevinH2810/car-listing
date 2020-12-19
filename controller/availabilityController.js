@@ -17,7 +17,6 @@ module.exports = class AvailabilityController extends BaseController {
 		//availability 1 = true (available) / 0 = false (unavailable)
 		const { date, status } = req.query;
 		const handleError = new HandleError();
-		console.log(`${date} + ${status}`);
 
 		this.service.getAllCarAvailability({ date, status }, (err, result) => {
 			if (err) {

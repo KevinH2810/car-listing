@@ -9,7 +9,6 @@ module.exports = class AvailabilityService {
 			.split("T")[0]
 		let status = payload.status ? payload.status : 1;
 		let dates = payload.date ? payload.date : currDate;
-		console.log(`${dates} + ${status} + ${payload.date}`)
 		let condition = {
 			[Op.and]: [{status},{date: dates}],
 		};
@@ -91,7 +90,6 @@ module.exports = class AvailabilityService {
 		db.carModel
 			.findByPk(id)
 			.then((data) => {
-				console.log(data)
 				if (data) {
 					return callback(null, data);
 				}else{
