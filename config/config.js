@@ -25,19 +25,4 @@ module.exports = {
 		salt: process.env.SALT_SYS || "",
 		iteration: process.env.SALT_ITERATION || 0,
 	},
-
-	development: {
-		username: "root",
-		password: "",
-		database: "database_development",
-		host: "127.0.0.1",
-		dialect: "mysql",
-	},
-	production: {
-		username: "root",
-		password: "",
-		database: "database_production",
-		host: "127.0.0.1",
-		dialect: "mysql",
-	},
 };
