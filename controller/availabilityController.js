@@ -13,40 +13,49 @@ module.exports = class AvailabilityController extends BaseController {
 
 	//make function to getAllCarModel
 	async getAllAvail(req, res) {
-    //add auth to filter based on user
-    //availability 1 = true (available) / 0 = false (unavailable)
+		//add auth to filter based on user
+		//availability 1 = true (available) / 0 = false (unavailable)
 		const { date, status } = req.query;
 		const handleError = new HandleError();
+		console.log(`${date} + ${status}`);
 
-		this.service.getAllCarAvailability(
-			{ date, status },
-			(err, result) => {
-				if (err) {
-					handleError.sendCatchError(res, err);
-					return;
-				}
-
-				return this.sendSuccessResponse(res, {
-					status: 200,
-					message: result,
-				});
+		this.service.getAllCarAvailability({ date, status }, (err, result) => {
+			if (err) {
+				handleError.sendCatchError(res, err);
+				return;
 			}
-		);
+
+			return this.sendSuccessResponse(res, {
+				status: 200,
+				message: result,
+			});
+		});
 	}
 
 	async addCarAvail(req, res) {
 		const { date, price, modelId } = req.body;
 		const handleError = new HandleError();
-
-		if(!date || !price | !modelId){
-			return this.sendBadRequestResponse(res,{
+		const today = new Date()
+			.toISOString()
+			.replace("-", "/")
+			.split("T")[0]
+			.replace("-", "/");
+		if (date <= today) {
+			return this.sendBadRequestResponse(res, {
 				status: 400,
-				message: "please input the date, price or selected model"
-			})
+				message: "Invalid Date. please choose date after today",
+			});
+		}
+
+		if (!date || !price | !modelId) {
+			return this.sendBadRequestResponse(res, {
+				status: 400,
+				message: "please input the date, price or selected model",
+			});
 		}
 
 		let token = req.headers["x-access-token"] || req.headers["authorization"]; // Express headers are auto converted to lowercase
-		if (token.startsWith("Bearer ")) {
+		if (token && token.startsWith("Bearer ")) {
 			// Remove Bearer from string
 			token = token.slice(7, token.length);
 		}
@@ -62,10 +71,8 @@ module.exports = class AvailabilityController extends BaseController {
 				}
 
 				const { userId } = decoded;
-				let status =  1;
+				let status = 1;
 
-				console.log(`date = ${usedDate}`)
-				
 				this.service.addCarAvailability(
 					{
 						date,
@@ -86,30 +93,38 @@ module.exports = class AvailabilityController extends BaseController {
 						});
 					}
 				);
-
-				
 			});
 		} else {
-			handleError.sendCatchError(res, {
-				message: "Auth token is not supplied",
-			});
+			handleError.sendCatchError(res, "Auth token is not supplied");
 			return;
 		}
-  }
-  
-  async updateCarAvail(req, res) {
+	}
+
+	async updateCarAvail(req, res) {
 		const { availId, date, status, price, modelId } = req.body;
 		const handleError = new HandleError();
 
-		if(!availId || !status || !date || !price | !modelId){
-			return this.sendBadRequestResponse(res,{
+		const today = new Date()
+			.toISOString()
+			.replace("-", "/")
+			.split("T")[0]
+			.replace("-", "/");
+		if (date <= today) {
+			return this.sendBadRequestResponse(res, {
 				status: 400,
-				message: "please input the id,status,  date, price or selected model"
-			})
+				message: "Invalid Date. please choose date after today",
+			});
+		}
+
+		if (!availId || !status || !date || !price | !modelId) {
+			return this.sendBadRequestResponse(res, {
+				status: 400,
+				message: "please input the id,status,  date, price or selected model",
+			});
 		}
 
 		let token = req.headers["x-access-token"] || req.headers["authorization"]; // Express headers are auto converted to lowercase
-		if (token.startsWith("Bearer ")) {
+		if (token && token.startsWith("Bearer ")) {
 			// Remove Bearer from string
 			token = token.slice(7, token.length);
 		}
@@ -126,59 +141,69 @@ module.exports = class AvailabilityController extends BaseController {
 
 				const { userId } = decoded;
 
-        const AuthToUpdate = await this.service.checkAuth(userId, availId)
+				//add funciton to check car Model if its exists
 
-        if (AuthToUpdate === 1){
-          this.service.updateCarAvailability(
-            {
-              date,
-              price,
-              modelId,
-              status,
-              userId,
-            }, availId,
-            (err, result) => {
-              if (err) {
-                handleError.sendCatchError(res, err);
-                return;
-              }
-  
-              return this.sendSuccessResponse(res, {
-                status: 200,
-                message: result,
-              });
-            }
-          );
-        }else {
-          return this.sendBadRequestResponse(res, {
-            status: 400,
-            message: "unauthorized request"
-          })
-        }
+				this.service.isExists(modelId, async (err, result) => {
+					if (err) {
+						handleError.sendCatchError(res, err);
+						return;
+					}
 
-				
+					const AuthToUpdate = await this.service.checkAuth(userId, availId);
+
+					if (AuthToUpdate === 1) {
+						this.service.updateCarAvailability(
+							{
+								date,
+								status,
+								price,
+								modelId,
+							},
+							availId,
+							(err, result) => {
+								if (err) {
+									handleError.sendCatchError(res, err);
+									return;
+								}
+
+								return this.sendSuccessResponse(res, {
+									status: 200,
+									message: "data updated succesfully",
+								});
+							}
+						);
+					} else if (AuthToUpdate === 0) {
+						return this.sendBadRequestResponse(res, {
+							status: 400,
+							message: "unauthorized update",
+						});
+					} else {
+						return this.sendBadRequestResponse(res, {
+							status: 400,
+							message: "invalid parameter",
+						});
+					}
+				});
 			});
 		} else {
-			handleError.sendCatchError(res, {
-				message: "Auth token is not supplied",
-			});
+			handleError.sendCatchError(res, "Auth token is not supplied");
 			return;
 		}
-  }
-  
-  async deleteCarAvail(req, res) {
+	}
+
+	async deleteCarAvail(req, res) {
 		const { availId } = req.body;
 		const handleError = new HandleError();
 
-		if(!availId){
-			return this.sendBadRequestResponse(res,{
+		if (!availId) {
+			return this.sendBadRequestResponse(res, {
 				status: 400,
-				message: "please input the parameter id"
-			})
+				message: "please input the parameter id",
+			});
 		}
 
 		let token = req.headers["x-access-token"] || req.headers["authorization"]; // Express headers are auto converted to lowercase
-		if (token.startsWith("Bearer ")) {
+		if (token && token.startsWith("Bearer ")) {
 			// Remove Bearer from string
 			token = token.slice(7, token.length);
 		}
@@ -195,38 +220,37 @@ module.exports = class AvailabilityController extends BaseController {
 
 				const { userId } = decoded;
 
-        const AuthToUpdate = await this.service.checkAuth(userId, availId)
+				const AuthToUpdate = await this.service.checkAuth(userId, availId);
 
-        if (AuthToUpdate === 1){
-          this.service.deleteCarAvailability(
-            {
-              availId,
-            },
-            (err, result) => {
-              if (err) {
-                handleError.sendCatchError(res, err);
-                return;
-              }
-  
-              return this.sendSuccessResponse(res, {
-                status: 200,
-                message: result,
-              });
-            }
-          );
-        }else {
-          return this.sendBadRequestResponse(res, {
-            status: 400,
-            message: "unauthorized delete"
-          })
-        }
+				if (AuthToUpdate === 1) {
+					this.service.deleteCarAvailability(
+						availId,
+						(err, result) => {
+							if (err) {
+								handleError.sendCatchError(res, err);
+								return;
+							}
 
-				
+							return this.sendSuccessResponse(res, {
+								status: 200,
+								message: result,
+							});
+						}
+					);
+				} else if (AuthToUpdate === 0) {
+					return this.sendBadRequestResponse(res, {
+						status: 400,
+						message: "unauthorized delete",
+					});
+				} else {
+					return this.sendBadRequestResponse(res, {
+						status: 400,
+						message: "invalid parameter",
+					});
+				}
 			});
 		} else {
-			handleError.sendCatchError(res, {
-				message: "Auth token is not supplied",
-			});
+			handleError.sendCatchError(res, "Auth token is not supplied");
 			return;
 		}
 	}

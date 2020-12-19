@@ -52,31 +52,20 @@ module.exports = class CarModelController extends BaseController {
 
 				const { userId } = decoded;
 
-				const AuthToUpdate = await this.service.checkAuth(userId, modelId);
+				this.service.searchMyCarModel({ userId }, (err, result) => {
+					if (err) {
+						handleError.sendCatchError(res, err);
+						return;
+					}
 
-				if (AuthToUpdate === 1) {
-					this.service.searchMyCarModel({ userId }, (err, result) => {
-						if (err) {
-							handleError.sendCatchError(res, err);
-							return;
-						}
-
-						return this.sendSuccessResponse(res, {
-							status: 200,
-							message: result,
-						});
+					return this.sendSuccessResponse(res, {
+						status: 200,
+						message: result,
 					});
-				} else {
-					return this.sendBadRequestResponse(res, {
-						status: 400,
-						message: "unauthorized request",
-					});
-				}
+				});
 			});
 		} else {
-			handleError.sendCatchError(res, {
-				message: "Auth token is not supplied",
-			});
+			handleError.sendCatchError(res, "Auth token is not supplied");
 			return;
 		}
 	}
@@ -91,49 +80,17 @@ module.exports = class CarModelController extends BaseController {
 			});
 		}
 
-		let token = req.headers["x-access-token"] || req.headers["authorization"]; // Express headers are auto converted to lowercase
-		if (token.startsWith("Bearer ")) {
-			// Remove Bearer from string
-			token = token.slice(7, token.length);
-		}
+		this.service.getCarDetail(id, (err, result) => {
+			if (err) {
+				handleError.sendCatchError(res, err);
+				return;
+			}
 
-		if (token) {
-			jwt.verify(token, config.token.secret, (err, decoded) => {
-				if (err) {
-					return res.json({
-						status: 500,
-						success: false,
-						message: `Token is not valid error = ${err}`,
-					});
-				}
-
-				const { userId } = decoded;
-
-				this.service.getCarDetail(id, (err, result) => {
-					if (err) {
-						handleError.sendCatchError(res, err);
-						return;
-					}
-
-					if (result.userId !== userId) {
-						return this.sendInvalidPayloadResponse(res, {
-							status: 422,
-							message: "Error authorization",
-						});
-					}
-
-					return this.sendSuccessResponse(res, {
-						status: 200,
-						message: result,
-					});
-				});
+			return this.sendSuccessResponse(res, {
+				status: 200,
+				message: result,
 			});
-		} else {
-			handleError.sendCatchError(res, {
-				message: "Auth token is not supplied",
-			});
-			return;
-		}
+		});
 	}
 
 	async addCar(req, res) {
@@ -143,7 +100,8 @@ module.exports = class CarModelController extends BaseController {
 		if (!model || !brandId || !year || !colorId || !fuelId || !engine) {
 			return this.sendBadRequestResponse(res, {
 				status: 400,
-				message: "please input the model, brandId, year, colorId, fuelId, engine parameter",
+				message:
+					"please input the model, brandId, year, colorId, fuelId, engine parameter",
 			});
 		}
 
@@ -163,7 +121,10 @@ module.exports = class CarModelController extends BaseController {
 					});
 				}
 
-				console.log(util.inspect(decoded, { showHidden: false, depth: null }));
+				console.log(
+					"Decoded = ",
+					util.inspect(decoded, { showHidden: false, depth: null })
+				);
 
 				const { userId } = decoded;
 
@@ -191,26 +152,33 @@ module.exports = class CarModelController extends BaseController {
 				);
 			});
 		} else {
-			handleError.sendCatchError(res, {
-				message: "Auth token is not supplied",
-			});
+			handleError.sendCatchError(res, "Auth token is not supplied");
 			return;
 		}
 	}
 
 	async updateCar(req, res) {
-		const { modelId, model, year, engine } = req.body;
+		const { modelId, modelName, brandId, year, colorId, fuelId, engine } = req.body;
 		const handleError = new HandleError();
 
-		if (!modelId || !model || !brandId || !year || !colorId || !fuelId || !engine) {
+		if (
+			!modelId ||
+			!modelName ||
+			!brandId ||
+			!year ||
+			!colorId ||
+			!fuelId ||
+			!engine
+		) {
 			return this.sendBadRequestResponse(res, {
 				status: 400,
-				message: "please input the model, brandId, year, colorId, fuelId, engine parameter",
+				message:
+					"please input the id, modelName, brandId, year, colorId, fuelId, engine parameter",
 			});
 		}
 
 		let token = req.headers["x-access-token"] || req.headers["authorization"]; // Express headers are auto converted to lowercase
-		if (token.startsWith("Bearer ")) {
+		if (token && token.startsWith("Bearer ")) {
 			// Remove Bearer from string
 			token = token.slice(7, token.length);
 		}
@@ -228,13 +196,19 @@ module.exports = class CarModelController extends BaseController {
 				const { userId } = decoded;
 
 				const AuthToUpdate = await this.service.checkAuth(userId, modelId);
-
 				if (AuthToUpdate === 1) {
-					this.service.updateCarAvailability(
+					this.service.updateCarModel(
 						{
-							modelId,date,model, year, engine
+							modelId,
+							model: modelName,
+							brandId,
+							year,
+							colorId,
+							fuelId,
+							engine,
 						},
-						(err, result) => {
+						modelId,
+						(err, results) => {
 							if (err) {
 								handleError.sendCatchError(res, err);
 								return;
@@ -242,21 +216,24 @@ module.exports = class CarModelController extends BaseController {
 
 							return this.sendSuccessResponse(res, {
 								status: 200,
-								message: result,
+								message: "Data updated sucesfully",
 							});
 						}
 					);
+				} else if (AuthToUpdate === 0){
+					return this.sendBadRequestResponse(res, {
+						status: 400,
+						message: "unauthorized update",
+					});
 				} else {
 					return this.sendBadRequestResponse(res, {
 						status: 400,
-						message: "unauthorized request",
+						message: 'invalid parameter',
 					});
 				}
 			});
 		} else {
-			handleError.sendCatchError(res, {
-				message: "Auth token is not supplied",
-			});
+			handleError.sendCatchError(res, "Auth token is not supplied");
 			return;
 		}
 	}
@@ -286,10 +263,8 @@ module.exports = class CarModelController extends BaseController {
 				const AuthToUpdate = await this.service.checkAuth(userId, modelId);
 
 				if (AuthToUpdate === 1) {
-					this.service.deleteCarAvailability(
-						{
-							modelId,
-						},
+					this.service.deleteCarModel(
+						modelId,
 						(err, result) => {
 							if (err) {
 								handleError.sendCatchError(res, err);
@@ -302,22 +277,21 @@ module.exports = class CarModelController extends BaseController {
 							});
 						}
 					);
-				} else {
+				} else if (AuthToUpdate === 0){
 					return this.sendBadRequestResponse(res, {
 						status: 400,
 						message: "unauthorized delete",
 					});
+				} else {
+					return this.sendBadRequestResponse(res, {
+						status: 400,
+						message: 'invalid parameter',
+					});
 				}
 			});
 		} else {
-			handleError.sendCatchError(res, {
-				message: "Auth token is not supplied",
-			});
+			handleError.sendCatchError(res, "Auth token is not supplied");
 			return;
 		}
 	}
-
-	//add function to update car model based on login auth
-
-	//add function to delete car model based on login auth
 };

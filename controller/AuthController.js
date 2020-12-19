@@ -30,7 +30,7 @@ module.exports = class AuthController extends BaseController {
 					return;
 			}
 			
-			if(result.length > 0){
+			if(result && result.length > 0){
 				return this.sendResourceAlreadyExistResponse(res , {
 					status: 409,
 					message: "User Already Registered"

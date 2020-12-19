@@ -1,5 +1,5 @@
   module.exports = function(app) {
-      app.use('/model', require('./carListing'));
+      app.use('/model', require('./carModel'));
       app.use('/listing', require('./availability'));
       app.use('/brand', require('./brand'));
       app.use('/color', require('./color'));

@@ -10,7 +10,7 @@ module.exports = class FuelController extends BaseController {
   async getAllFuelType(req, res) {
 		const handleError = new HandleError();
 
-		this.service.getAllFuel((err, result) => {
+		this.service.getAllFuelType((err, result) => {
 			if (err) {
 				handleError.sendCatchError(res, err);
 				return;

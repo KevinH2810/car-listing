@@ -4,15 +4,18 @@ const Op = db.Sequelize.Op;
 
 module.exports = class AvailabilityService {
 	async getAllCarAvailability(payload, callback) {
-		let currDate =  new Date().toISOString().replace('-', '/').split('T')[0].replace('-', '/');
-		let status = payload.availability ? payload.availability : 1;
+		let currDate = new Date()
+			.toISOString()
+			.split("T")[0]
+		let status = payload.status ? payload.status : 1;
 		let dates = payload.date ? payload.date : currDate;
+		console.log(`${dates} + ${status} + ${payload.date}`)
 		let condition = {
-			[Op.or]: [status, dates],
+			[Op.and]: [{status},{date: dates}],
 		};
 
 		avail
-			.findAll({ where: condition, include: ["listing"] })
+			.findAll({ where: condition, include: ["model"] })
 			.then((data) => {
 				return callback(null, data);
 			})
@@ -34,9 +37,9 @@ module.exports = class AvailabilityService {
 
 	async updateCarAvailability(payload, availId, callback) {
 		avail
-			.update(payload, { where: { availId: availId } })
+			.update(payload, { where: { id: availId } })
 			.then((data) => {
-				if (res > 0) {
+				if (data.length > 0) {
 					return callback(null, data);
 				} else {
 					return callback(
@@ -52,9 +55,9 @@ module.exports = class AvailabilityService {
 
 	async deleteCarAvailability(availId, callback) {
 		avail
-			.destroy({ where: { availId: availId } })
+			.destroy({ where: { id: availId } })
 			.then((data) => {
-				if (res > 0) {
+				if (data.length > 0) {
 					return callback(null, data);
 				} else {
 					return callback(
@@ -68,19 +71,35 @@ module.exports = class AvailabilityService {
 			});
 	}
 
-	async checkAuth(userId, availId) {
-		return (new Promise((resolve) => {
+	async checkAuth(userId, id) {
+		return new Promise((resolve) => {
 			avail
-				.findAll({ where: { availId }})
+			.findByPk(id)
 				.then((data) => {
 					if (data.userId !== userId) {
-						resolve(0)
+						resolve(0);
 					}
-					resolve(1)
+					resolve(1);
 				})
 				.catch((err) => {
 					resolve(err);
 				});
-		}))
+		});
+	}
+
+	async isExists(id, callback) {
+		db.carModel
+			.findByPk(id)
+			.then((data) => {
+				console.log(data)
+				if (data) {
+					return callback(null, data);
+				}else{
+					return callback("No car Model with that id", null);
+				}
+			})
+			.catch((err) => {
+				return callback(err, null);
+			});
 	}
 };

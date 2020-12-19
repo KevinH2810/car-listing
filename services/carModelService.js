@@ -1,5 +1,5 @@
 const { db } = require("../model");
-const car = db.carListing;
+const car = db.carModel;
 const Op = db.Sequelize.Op;
 
 module.exports = class carListingService {
@@ -8,7 +8,17 @@ module.exports = class carListingService {
 		let condition = { userId: payload.userId ? payload.userId : "" };
 
 		car
-			.findAll({ where: condition, include: ["brand", "color", "fuel"] })
+			.findAll({ where: condition}, {
+				attributes: {
+					exclude: [ "createdAt", "updatedAt"],
+				},
+				include: [
+					{ model: db.user, as: "user", attributes: { exclude: ["id","hashedPassword","createdAt", "updatedAt"] }, required: false },
+					"brand",
+					"color",
+					"fuel",
+				],
+			} )
 			.then((data) => {
 				return callback(null, data);
 			})
@@ -61,11 +71,11 @@ module.exports = class carListingService {
 			});
 	}
 
-	async updateCarModel(payload, carListingId, callback) {
+	async updateCarModel(payload, carModelId, callback) {
 		car
-			.update(payload, { where: { carListingId: carListingId } })
+			.update(payload, { where: { id: carModelId } })
 			.then((data) => {
-				if (res > 0) {
+				if (data > 0) {
 					return callback(null, data);
 				} else {
 					return callback(
@@ -75,32 +85,27 @@ module.exports = class carListingService {
 				}
 			})
 			.catch((err) => {
+				console.log(err)
 				return callback(err, null);
 			});
 	}
 
-	async deleteCarAvailability(availId, callback) {
+	async deleteCarModel(modelId, callback) {
 		car
-			.destroy({ where: { availId: availId } })
+			.destroy({ where: { id: modelId } })
 			.then((data) => {
-				if (res > 0) {
-					return callback(null, data);
-				} else {
-					return callback(
-						null,
-						`Cant update Availability with id = ${availId}. maybe because Availability not found or req.Body is empty`
-					);
-				}
+				return callback(null, data);
 			})
 			.catch((err) => {
+				console.log(err)
 				return callback(err, null);
 			});
 	}
 
-	async checkAuth(userId, availId) {
+	async checkAuth(userId, id) {
 		return new Promise((resolve) => {
 			car
-				.findAll({ where: { availId } })
+				.findByPk(id)
 				.then((data) => {
 					if (data.userId !== userId) {
 						resolve(0);
