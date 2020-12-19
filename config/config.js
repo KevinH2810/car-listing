@@ -4,6 +4,9 @@ module.exports = {
     app: {
         port: process.env.API_PORT || 9099,
     },
+    token: {
+        secret: process.env.SECRET_TOKEN
+    },
     db: {
         PORT: process.env.MYSQL_PORT,
         HOST: process.env.MYSQL_HOST,
@@ -17,5 +20,9 @@ module.exports = {
           acquire: 30000,
           idle: 10000
         }
+    },
+    salt: {
+        salt: process.env.SALT_SYS || '',
+        iteration: process.env.SALT_ITERATION || 0,
     }
 }

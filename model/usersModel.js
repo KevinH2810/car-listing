@@ -4,9 +4,9 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       field: 'username'
     },
-    password: {
+    hashedPassword: {
       type: Sequelize.STRING,
-      field: 'password'
+      field: 'hashedPassword'
     },
   });
 

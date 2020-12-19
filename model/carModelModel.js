@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const carListingModel = sequelize.define("carListing", {
+  const carModelModel = sequelize.define("carModel", {
     model: {
       type: Sequelize.STRING,
       field: 'model'
@@ -14,5 +14,5 @@ module.exports = (sequelize, Sequelize) => {
     },
   });
 
-  return carListingModel;
+  return carModelModel;
 };

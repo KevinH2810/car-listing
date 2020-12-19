@@ -46,6 +46,9 @@ module.exports = class BaseController {
 			32,
 			"sha1",
 			(err, res) => {
+				if(err){
+					console.log("error = ", err)
+				}
 				resolve(res.toString())
 			}
 		);
