@@ -18,6 +18,13 @@ module.exports = class AvailabilityController extends BaseController {
 		const { date, status } = req.query;
 		const handleError = new HandleError();
 
+		if(status && status !== 1 || status !== 0){
+			return this.sendInvalidPayloadResponse(res,{
+				status: 422,
+				message: "invalid status. choose 1 for available or 0 for booked/unavailable"
+			})
+		}
+
 		this.service.getAllCarAvailability({ date, status }, (err, result) => {
 			if (err) {
 				handleError.sendCatchError(res, err);
@@ -102,6 +109,13 @@ module.exports = class AvailabilityController extends BaseController {
 	async updateCarAvail(req, res) {
 		const { availId, date, status, price, modelId } = req.body;
 		const handleError = new HandleError();
+
+		if(status && status !== 1 || status !== 0){
+			return this.sendInvalidPayloadResponse(res,{
+				status: 422,
+				message: "invalid status. choose 1 for available or 0 for booked/unavailable"
+			})
+		}
 
 		const today = new Date()
 			.toISOString()

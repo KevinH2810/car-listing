@@ -31,7 +31,7 @@ After clonning the repository, open the folder and rename ```.env.example``` to 
 
 ### [GET] - /
 
-Login via Facebook oAuth. will generate JWTToken from username + userid supplied by facebook.
+Login via Facebook oAuth. will generate JWTToken from data supplied by facebook.
 the token are available for 24 hour.
 
 After you got the JWT token, you can use the token as the bearer token in Postman to test the routes.
@@ -195,21 +195,21 @@ modelId
 Date Format in YYYY-MM-DD
 
 ---
-### [PUT] - /model/updateCar
-update the information of car Model.
+### [PUT] - /listing/updateAvail
+update the information of car availability.
 require JWT token in header to validate userId
 
+Date Format in YYYY-MM-DD
+status 1 for available, 0 for unavailable/booked
 ```
 Params 
 (Body - x-www-form-urlencoded):
 
-modelid [must](_id: of the data, can be acquired when search the data)
-modelName
-brandId
-year
-colorId
-fuelId
-engine
+availId [must](_id: of the data, can be acquired when search the data)
+date
+status
+price
+modelId
 ```
 
 ---
