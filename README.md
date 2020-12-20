@@ -171,7 +171,12 @@ modelId [must](_id: of the data, can be acquired when search the data)
 Used to get all car availability from Database.
 you can supply parameter, if empty it will default takes today date and availability true
 
-```params date & status (1 for available, 0 for unavailable) (Date Format YYYY-MM-DD)```
+```
+params date & status 
+
+(1 for available, 0 for unavailable/booked) 
+(Date Format YYYY-MM-DD)
+```
 
 ---
 ### [POST] - /listing/addAvail
