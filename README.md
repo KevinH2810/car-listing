@@ -144,7 +144,7 @@ require JWT token in header to validate userId
 Params 
 (Body - x-www-form-urlencoded):
 
-modelid [must](_id: of the data, can be acquired when search the data)
+modelid [must](_id: of the data, can be acquired when search the car model)
 modelName
 brandId
 year
@@ -162,7 +162,7 @@ require JWT Token header for authorization.
 Params 
 (Body - x-www-form-urlencoded):
 
-modelId [must](_id: of the data, can be acquired when search the data)
+modelId [must](_id: of the data, can be acquired when search the car model)
 ```
 
 ## Car Availability
@@ -197,7 +197,7 @@ Date Format in YYYY-MM-DD
 ---
 ### [PUT] - /listing/updateAvail
 update the information of car availability.
-require JWT token in header to validate userId
+require JWT token in header to validate user.
 
 Date Format in YYYY-MM-DD
 status 1 for available, 0 for unavailable/booked
@@ -205,7 +205,7 @@ status 1 for available, 0 for unavailable/booked
 Params 
 (Body - x-www-form-urlencoded):
 
-availId [must](_id: of the data, can be acquired when search the data)
+availId [must](_id: of the data, can be acquired when search the car availability)
 date
 status
 price
@@ -213,12 +213,12 @@ modelId
 ```
 
 ---
-### [DELETE] - /model/deleteCar
-Delete a car model by id.
+### [DELETE] - /listing/deleteAvail
+Delete a car availability
 require JWT Token header for authorization.
 
 ```
 Params:
 
-modelId [must](_id: of the data, can be acquired when search the car model )
+availId [must](_id: of the data, can be acquired when search the car availability )
 ```
