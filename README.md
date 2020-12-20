@@ -33,6 +33,8 @@ localhost:{port}/v1/Citizen/
 Login via Facebook oAuth. will generate JWTToken from username + userid supplied by facebook.
 the token are available for 24 hour.
 
+After you got the JWT token, you can use the token as the bearer token in Postman to test the routes.
+
 ## Brand
 
 ---
