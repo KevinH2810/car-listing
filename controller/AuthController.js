@@ -68,7 +68,7 @@ module.exports = class AuthController extends BaseController {
 
 				// create JWT token
 				var tokens = jwt.sign(
-					{ username: result.username, userId: result.id },
+					{ username: name, userId: id },
 					config.token.secret,
 					{
 						expiresIn: 86400, // expires in 24 hours
