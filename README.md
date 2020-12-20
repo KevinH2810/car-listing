@@ -186,6 +186,7 @@ date
 price
 modelId
 ```
+Date Format in YYYY-MM-DD
 
 ---
 ### [PUT] - /model/updateCar
@@ -213,5 +214,5 @@ require JWT Token header for authorization.
 ```
 Params:
 
-modelId [must](_id: of the data, can be acquired when search the data)
+modelId [must](_id: of the data, can be acquired when search the car model )
 ```
