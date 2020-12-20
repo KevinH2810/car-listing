@@ -28,20 +28,10 @@ localhost:{port}/v1/Citizen/
 
 ## Login
 
----
-### [POST] - /v1/Login/Register
-you can register a new user in here by supplying the username and password as request query (Params).
+### [GET] - /
 
-```Params - username & password```
-
----
-### [GET] - /v1/Login/
-
-Used to login and generate the JWTtoken
-the token are available for 24 Hours by supplying username and password.
-as request query (Params).
-
-```Params - username & password```
+Login via Facebook oAuth. will generate JWTToken from username + userid supplied by facebook.
+the token are available for 24 hour.
 
 ## Brand
 

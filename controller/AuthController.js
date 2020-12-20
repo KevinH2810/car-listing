@@ -16,7 +16,7 @@ module.exports = class AuthController extends BaseController {
 			<body>
 				<a href="https://www.facebook.com/v6.0/dialog/oauth?client_id=${
 					config.fb.APP_ID
-				}&redirect_uri=${`http://${config.app.HOST}:${config.app.port}/oauth-redirect`}">
+				}&redirect_uri=${`http://${config.app.HOST}/oauth-redirect`}">
 					Log In With Facebook
 				</a>
 			</body>
