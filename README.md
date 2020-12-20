@@ -15,15 +15,16 @@ $ yarn start or npm start
 After clonning the repository, open the folder and rename ```.env.example``` to ```.env``` and setting the value to your desired settings
 ## Routes
 
-### available routes on this apps are
+### available basic routes on this apps are
 
-```bash
-# [GET] - to Login
-localhost:{port}/login/
-# [POST] - to register
-localhost:{port}/Login/register
-# [GET, POST, PUT, DELETE]
-localhost:{port}/v1/Citizen/
+```
+{host}:{port}/
+{host}:{port}/brand
+{host}:{port}/color
+{host}:{port}/fuel
+{host}:{port}/model
+{host}:{port}/brand
+{host}:{port}/listing
 ```
 
 ## Login
