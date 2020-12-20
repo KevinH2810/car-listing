@@ -33,9 +33,7 @@ module.exports = class AuthController extends BaseController {
 				"https://graph.facebook.com/v6.0/oauth/access_token?" +
 				`client_id=${config.fb.APP_ID}&` +
 				`client_secret=${config.fb.APP_SECRET}&` +
-				`redirect_uri=${encodeURIComponent(
-					`http://${config.app.HOST}:${config.app.port}/oauth-redirect`
-				)}&` +
+				`redirect_uri=${encodeURIComponent(`${config.app.HOST}/oauth-redirect`)}&` +
 				`code=${encodeURIComponent(authCode)}`;
 
 			// Make an API request to exchange `authCode` for an access token
