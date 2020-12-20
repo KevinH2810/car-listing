@@ -57,7 +57,7 @@ module.exports = class AuthController extends BaseController {
 					return;
 				}
 
-				if (!result && result.length === 0) {
+				if (!result) {
 					this.service.registerNewUser({ id, username: name }, (err, result) => {
 						if (err) {
 							handleError.sendCatchError(res, err);
