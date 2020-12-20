@@ -2,11 +2,16 @@ require("dotenv").config();
 
 module.exports = {
 	app: {
-		port: process.env.PORT || 9099,
+        port: process.env.PORT || 9099,
+        HOST: process.env.HOST
 	},
 	token: {
 		secret: process.env.SECRET_TOKEN,
-	},
+    },
+    fb: {
+        APP_ID: process.env.APP_ID,
+        APP_SECRET: process.env.APP_SECRET,
+    },
 	db: {
 		PORT: process.env.MYSQL_PORT,
 		HOST: process.env.MYSQL_HOST,

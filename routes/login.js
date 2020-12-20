@@ -7,8 +7,7 @@ router.get('/', (req, res) => {
     authController.login(req, res)
 });
 
-router.post('/register', (req, res) => {
-    authController.register(req, res)
-});
-
+router.get('/oauth-redirect', (req, res) => {
+    authController.oauthRedirect(req, res)
+  });
 module.exports = router;

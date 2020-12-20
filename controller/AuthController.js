@@ -3,99 +3,93 @@ const HandleError = require("./HandleError");
 const jwt = require("jsonwebtoken");
 const config = require("../config/config");
 const { UserService } = require("../services");
-
+const axios = require("axios");
 
 module.exports = class AuthController extends BaseController {
 	constructor() {
 		super(new UserService());
 	}
 
-	// register to Database
-	async register(req, res) {
+	async login(req, res) {
+		res.send(`
+		<html>
+			<body>
+				<a href="https://www.facebook.com/v6.0/dialog/oauth?client_id=${
+					config.fb.APP_ID
+				}&redirect_uri=${`http://${config.app.HOST}:${config.app.port}/oauth-redirect`}">
+					Log In With Facebook
+				</a>
+			</body>
+		</html>
+		`);
+	}
+
+	async oauthRedirect(req, res) {
 		const handleError = new HandleError();
-		const { username, password } = req.query;
+		try {
+			const authCode = req.query.code;
 
-		if (!username || !password){
-			return this.sendInvalidPayloadResponse(res, {
-				status: 422,
-				message: "please supply username / password",
-			});
-		}
+			const accessTokenUrl =
+				"https://graph.facebook.com/v6.0/oauth/access_token?" +
+				`client_id=${config.fb.APP_ID}&` +
+				`client_secret=${config.fb.APP_SECRET}&` +
+				`redirect_uri=${encodeURIComponent(
+					`http://${config.app.HOST}:${config.app.port}/oauth-redirect`
+				)}&` +
+				`code=${encodeURIComponent(authCode)}`;
 
-		const hashedPassword = await this.hashPassword(password);
-		
-		this.service.ValidateUserInDatabe(username, (err, result) => {
-			if (err){
-				handleError.sendCatchError(res, err);
+			// Make an API request to exchange `authCode` for an access token
+			const accessToken = await axios
+				.get(accessTokenUrl)
+				.then((res) => res.data["access_token"]);
+
+			//get the user personal Data and transform it to JWT. dont forget to register the data to the database
+			const { name, id } = await axios
+				.get(
+					`https://graph.facebook.com/me?access_token=${encodeURIComponent(
+						accessToken
+					)}`
+				)
+				.then((res) => res.data);
+
+			//Check if the user exists id db
+			this.service.ValidateUserInDatabe(name, (err, result) => {
+				if (err) {
+					handleError.sendCatchError(res, err);
 					return;
-			}
-			
-			if(result && result.length > 0){
-				return this.sendResourceAlreadyExistResponse(res , {
-					status: 409,
-					message: "User Already Registered"
-				})
-			}
-			
-				this.service.registerNewUser(
-					{ username, hashedPassword },
-					(err, result) => {
+				}
+
+				if (!result && result.length === 0) {
+					this.service.registerNewUser({ id, username: name }, (err, result) => {
 						if (err) {
 							handleError.sendCatchError(res, err);
 							return;
 						}
-		
-						return this.sendSuccessResponse(res, {
-							status: 200,
-							message: "User Registered",
-						});
+					});
+				}
+
+				// create JWT token
+				var tokens = jwt.sign(
+					{ username: result.username, userId: result.id },
+					config.token.secret,
+					{
+						expiresIn: 86400, // expires in 24 hours
 					}
 				);
-			
-		})	
-	}
 
-	async login(req, res) {
-		const handleError = new HandleError();
-		const { username, password } = req.query;
+				return this.sendSuccessResponse(res, {
+					status: 200,
+					JWTtoken: tokens,
+				});
+			});
 
-		// get from database
-		this.service.ValidateUserInDatabe(username, (err, result) => {
+			// make function to save the accessToken for the given user
+		} catch (err) {
+			console.log(err);
 			if (err) {
 				handleError.sendCatchError(res, err);
 				return;
 			}
-
-			if (result.length === 0) {
-				return this.sendNotFoundResponse(res, {
-					status: 404,
-					message: "username does not exist",
-				});
-			}
-
-			if (this.isPasswordCorrect(password, result.hashedPassword)) {
-				return this.sendInvalidPayloadResponse(res, {
-					status: 422,
-					message: "password does not match",
-				});
-			}
-
-			// create a token
-			var tokens = jwt.sign(
-				{ username: result.username, userId: result.id },
-				config.token.secret,
-				{
-					expiresIn: 86400, // expires in 24 hours
-				}
-			);
-
-			return this.sendSuccessResponse(res, {
-				status: 200,
-				message: {
-					message: "login succesfull",
-					token: tokens,
-				},
-			});
-		});
+		}
 	}
 };
