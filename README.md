@@ -1,11 +1,5 @@
 # Car Listing Marketplace
 
-## Testing
-you can test the function on https://peaceful-retreat-74148.herokuapp.com/. use postman and enter the link +"{path}",
-
-## DISCLAIMER 
-Do Not Enter sensitive data to the website. any losing data in doing so is beyond our responsibility. process at your own risk
-
 ## How to Usage
 
 ```bash
